@@ -13,6 +13,8 @@ var morte
 var ponto=0
 var reset,fim,resetmg
 var fimg
+var jump,point,colide
+var velo=4
 function preload(){ // funç~;ao que carregar todas as imagens e animações
   trex_running = loadAnimation("trex1.png", "trex3.png", "trex4.png");
 solo_run= loadImage("ground2.png")
@@ -31,6 +33,10 @@ morte=loadAnimation("trex_collided.png")
 
 resetmg= loadImage("restart.png")
 fimg=loadImage("gameOver.png")
+
+jump=loadSound("jump.mp3")
+point=loadSound("checkPoint.mp3")
+colide=loadSound("die.mp3")
 }
 
 function setup(){ // todas as configuraçoes dos objetos
@@ -68,8 +74,13 @@ function draw(){
   if(gr==="jogar"){
     nuvem();
     cactu();
+    if(ponto>0&&ponto%100===0){
+      point.play()
+      velo=velo+1
+    }
     if(keyDown("space")&&trex.y>160){
       trex.velocityY = -8;
+      jump.play()
     }
     if(keyDown("down")){
       trex.changeAnimation("down",cabeça)
@@ -82,12 +93,13 @@ function draw(){
     }
     trex.velocityY = trex.velocityY + 0.5; // gravidade
     
-  solo.velocityX = -3
+  solo.velocityX = -velo
   if(solo.x<0){
     solo.x=solo.width/2
   }
   if(trex.isTouching(g_cac)){
     gr="fim"
+    colide.play()
   }
   ponto++
   }
@@ -98,6 +110,7 @@ g_nuv.setVelocityXEach(0)
 g_cac.setLifetimeEach(-1)
 g_nuv.setLifetimeEach(-1)
 trex.changeAnimation("morte",morte)
+trex.velocityY=0
   
 reset.visible=true
 fim.visible=true
@@ -106,6 +119,7 @@ fim.visible=true
   trex.collide(solo2)
   drawSprites();
 text("ponto "+ponto,17,12)
+
 }
 
 function nuvem(){
@@ -128,7 +142,7 @@ function cactu(){
   
   if(frameCount%60===0){
     var obstaculo=createSprite(600,180,10,10);
-    obstaculo.velocityX=-3
+    obstaculo.velocityX=-velo
     var SL
     SL=Math.round(random(1,7))
     g_cac.add(obstaculo)
@@ -137,7 +151,7 @@ function cactu(){
     if(SL===7){
       var ave;
       ave=createSprite(600,180,20,20);
-      ave.velocityX=-3;
+      ave.velocityX=-velo;
       ave.addAnimation("ave",pite);
       ave.scale=0.6;
       ave.lifetime=200;
